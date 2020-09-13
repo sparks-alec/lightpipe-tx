@@ -2,7 +2,7 @@
 // Settings
 var Settings = {
 	pipeID: generateKey(),
-	maxFramerate: 10,
+	maxFramerate: 4,
 	server: 'lightpipe.glitch.me'
 }
 if(localStorage.getItem("Settings")){
