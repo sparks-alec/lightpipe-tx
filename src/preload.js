@@ -95,14 +95,13 @@ function graphView(){
 }
 
 
-
-
-
+var last = 0;
 // sACN
 const e131 = require('e131');
 var sACN = new e131.Server([0x0001]);
 sACN.on('packet', (packet) => {
 	if(packet.getPriority()!=0 && packet.getUniverse()==1){
+		
 		Pipe.universes[packet.getUniverse()] = packet.getSlotsData();
 		sendDMX();
 	}
@@ -127,10 +126,14 @@ function sendDMX(){
 	if(Date.now()<Pipe.lastSend+(1000/Settings.maxFramerate)){
 		return true;
 	}
-
 	Pipe.lastSend = Date.now();
+
 	Pipe.sequence++;
+	
 	tripTimes[Pipe.sequence] = {sent: Date.now()};
+
+	universeView();
+	
 
 	var data = JSON.stringify({
 		pipe: Settings.pipeID,
@@ -141,12 +144,13 @@ function sendDMX(){
 	  hostname: Settings.server,
 	  port: 443,
 	  path: '/setUniverse',
-	  method: 'GET',
+	  method: 'POST',
 	  headers: {
 	    'Content-Type': 'application/json',
 	    'Content-Length': data.length
 	  }
 	}
+
 	const req = https.request(options, res => {
 		res.on('data', d => {
 			if(d.length>100){
@@ -155,9 +159,7 @@ function sendDMX(){
 			}
 			var response = JSON.parse(d.toString());
 			if(response.status=="ok"){
-				indicatorFlash();
-				universeView();
-
+				indicatorFlash();				
 				var t = tripTimes[Number(response.sequence)];
 				t.received = Date.now();
 				t.delay = t.received-t.sent;
@@ -172,7 +174,7 @@ function sendDMX(){
 	req.on('error', error => {
 		console.error(error)
 	})
-	req.write(data);
+	req.write(JSON.parse(JSON.stringify(data)));
 	req.end();
 }
 
