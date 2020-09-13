@@ -12,7 +12,6 @@ const createWindow = () => {
     width = 1120;
   }
 
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: width,
     height: 480,
