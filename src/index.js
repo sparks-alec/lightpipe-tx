@@ -6,9 +6,15 @@ if (require('electron-squirrel-startup')) {
 }
 
 const createWindow = () => {
+
+  var width = 820;
+  if(process.defaultApp){
+    width = 1120;
+  }
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1120,
+    width: width,
     height: 480,
     webPreferences: {
       worldSafeExecuteJavaScript: true,
@@ -17,7 +23,10 @@ const createWindow = () => {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.webContents.openDevTools();
+
+  if(process.defaultApp){
+    mainWindow.webContents.openDevTools();
+  }
 };
 
 app.on('ready', createWindow);
